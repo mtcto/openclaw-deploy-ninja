@@ -33,10 +33,10 @@ Use the `question` tool to ask the user about their installation preference:
 
 ### Phase 2: Daemon & Service Management
 1. **Handle macOS Launchd External Volume Restrictions (Conditional)**:
-   - **Important Rule**: If and ONLY IF the user chose to install to an external volume (a path starting with `/Volumes/`), macOS `launchd` will throw `Exit Code 78` because it refuses to write `StandardOutPath` logs to external drives. You must patch the log paths.
+   - **Important Rule**: If and ONLY IF the user chose to install to an external volume (a path starting with `/Volumes/` on macOS), macOS `launchd` will throw `Exit Code 78` because it refuses to write `StandardOutPath` logs to external drives. You must patch the log paths.
 2. **Installation Sequence**:
    - Run: `openclaw gateway install`
-   - *If on an external volume, run the following three commands:*
+   - *If on macOS AND on an external volume, run the following three commands (Skip this for Linux or internal Mac drives):*
      - `sed -i '' 's|/Volumes/.*/logs/gateway.log|/tmp/openclaw-gateway.log|g' ~/Library/LaunchAgents/ai.openclaw.gateway.plist`
      - `sed -i '' 's|/Volumes/.*/logs/gateway.err.log|/tmp/openclaw-gateway.err.log|g' ~/Library/LaunchAgents/ai.openclaw.gateway.plist`
      - `launchctl bootout gui/$UID/ai.openclaw.gateway` (ignore errors if not loaded)
