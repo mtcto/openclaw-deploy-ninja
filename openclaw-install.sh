@@ -484,9 +484,9 @@ uninstall_openclaw() {
   step "清理 Docker 沙盒容器与镜像"
   if command -v docker >/dev/null 2>&1; then
     log "正在查找并清理 OpenClaw 的 Docker 沙盒实例..."
-    # 查找所有以 openclaw-sandbox 开头的容器并强制删除
+    # 查找所有以 openclaw-sbx- 开头的容器并强制删除
     local sandbox_containers
-    sandbox_containers="$(docker ps -a --filter "name=openclaw-sandbox" --format "{{.ID}}" || true)"
+    sandbox_containers="$(docker ps -a --filter "name=openclaw-sbx-" --format "{{.ID}}" || true)"
     if [[ -n "$sandbox_containers" ]]; then
       log "检测到相关沙盒容器，正在停止并清理..."
       # shellcheck disable=SC2046

@@ -1,89 +1,45 @@
-# OpenClaw Deploy Ninja
+# OpenClaw 一键部署脚本 (openclaw-deploy-ninja)
 
-一个面向 OpenClaw 的一键安装脚本项目，目标是把「安装 + 安全加固 + 渠道配置 + Agent 绑定」一次走完。
+这是一个为 [OpenClaw](https://github.com/openclaw/openclaw) 量身定制的一键安装与配置向导脚本。
 
-## 项目亮点
+## ✨ 项目亮点
 
-1. 安全优先：默认仅主 Agent 保留宿主机操作能力，子 Agent 运行在 Docker 沙箱，避免 OpenClaw 裸奔。
-2. 自动安装 `openclaw-china/channels` 插件，开箱即用中国区渠道能力。
-3. 向导式配置渠道：支持 Telegram、钉钉、飞书（中国版）、企业微信。
-4. 向导式 Agent 配置：支持主 Agent + 多子 Agent，并支持渠道多账号绑定。
-5. 双安装模式：支持联网安装和本地离线安装，兼顾可翻墙与不可翻墙场景。
+1. **主打极致安全**  
+   默认配置下只有主 Agent 具备操作宿主机环境的全部权限。而创建的子 Agent 将全部分离并强制运行在安全的 Docker 沙箱（Sandbox）环境中。命令拦截与环境隔离，让你的 OpenClaw 再也不用“裸奔”。
 
-## 支持平台
+2. **自动集成开源优质环境**  
+   自动检测并安装必备依赖（Node.js、Docker等），并无缝集成安装 `@openclaw-china/channels` 插件，轻松解决中国区插件及国内渠道服务对接问题。
 
-- macOS (Intel / Apple Silicon)
-- Linux (x64)
+3. **通讯渠道向导式配置**  
+   告别手工修改冗长复杂 JSON 配置文件的痛苦。脚本支持向导式地一步步配置 **Telegram**、**钉钉**、**飞书** 以及 **企业微信** 渠道对接参数。
 
-## 快速开始
+4. **Agent向导式建立及隔离路由绑定**  
+   向导会自动辅助你对多个 Agent 进行设置、赋权并完成渠道通道的多账号绑定与事件隔离。
+
+5. **支持双轨安装：联网 & 本地双离线模式**  
+   对于网络通畅的开发者，可选择“联网安装”始终拉取最新上游代码与依赖；对于服务器无法翻墙或受限于内网的情况，可选择“本地模式”一键安装本地提供的预下载依赖（如 `offline-packages`）。
+
+---
+
+## 🚀 快速开始
+
+克隆或下载本仓库，并赋予执行权限运行即可：
 
 ```bash
 chmod +x openclaw-install.sh
 ./openclaw-install.sh
 ```
 
-脚本执行后会进入交互式向导，依次完成：
+> **注意：** 若您选择的是**本地安装**模式，请保证项目当前文件夹下 `offline-packages` 目录内存放了对应最新版的 `.tgz` 及 Node.js、Docker 的依赖包。
 
-- 安装模式选择（联网 / 本地）
-- 模型区域选择（国外 / 国内）
-- OpenClaw 安装与 Onboard
-- 插件与依赖安装
-- 主 Agent 与子 Agent 配置
-- 渠道账号录入与绑定
-- 状态检查与控制台打开
+---
 
-## 两种安装模式
+## 🗑️ 卸载与清理
 
-### 1) 联网安装
-
-适用于可访问外网环境。脚本会自动安装或升级依赖并安装最新 OpenClaw。
-
-### 2) 本地离线安装
-
-适用于受限网络环境。请提前将离线包放到项目根目录下的 `offline-packages/`。
-
-必需文件名模式如下：
-
-- `openclaw-*.tgz`
-- `clawhub-*.tgz`
-- `openclaw-china-channels-*.tgz`
-- `node-v*-<os>-<arch>.tar.gz` 或 `node-v*-<os>-<arch>.tar.xz`
-- macOS: `Docker-arm64.dmg` 或 `Docker-amd64.dmg`
-- Linux: `get-docker.sh`
-
-> 建议将离线包按上述命名放入 `offline-packages/`，脚本会自动识别并校验。
-
-## 安全模型说明
-
-- 主 Agent (`main`)：负责总体编排与管理。
-- 子 Agent：默认被限制在沙箱策略内，避免直接获得宿主机高风险操作能力。
-- 可执行型子 Agent：执行能力仍绑定在 Docker 沙箱中，并启用命令白名单与工作区文件访问限制。
-
-## 渠道与账号绑定
-
-向导会引导你为每个 Agent 选择管理渠道，并支持：
-
-- Telegram
-- 钉钉
-- 企业微信（Webhook 或应用模式）
-- 飞书中国版
-
-支持同一渠道多账号配置，并可按 `channel:accountId` 进行精细绑定。
-
-## 卸载
+如果您需要将 OpenClaw 从该宿主机及其对应的沙箱容器完全卸载清理：
 
 ```bash
 ./openclaw-install.sh uninstall
 ```
 
-卸载会清理 OpenClaw 数据目录、npm 全局包以及脚本创建的相关沙箱容器。
-
-## 常用目录
-
-- 安装根目录：`~/.openclaw`
-- 配置目录：`~/.openclaw/conf`
-- 本地 npm 前缀：`~/.openclaw/npm-global`
-
-## 免责声明
-
-本项目用于自动化部署与配置辅助。请在使用前确认你的渠道账号、API 密钥与企业合规要求，并在生产环境先做灰度验证。
+*(该操作会重置环境变量，移除 npm global 安装文件，删掉 config 目录并清空名为 `openclaw-sbx-` 的 Docker 沙箱实例)*
